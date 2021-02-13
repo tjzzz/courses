@@ -1,0 +1,229 @@
+%\documentclass{slides}
+\documentclass[12pt]{article}
+\usepackage{mathrsfs,mathbbold}
+\usepackage{amsfonts,amsbsy}
+\usepackage{graphicx}
+\usepackage{rotating}
+\usepackage{longtable}
+%\usepackage{landscape}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{epic,multibox,fancybox}
+\usepackage{calfrak}
+\usepackage{shadow}
+\usepackage{multirow}
+%\input{sem-a4.sty}
+%\usepackage{mystyle}
+\usepackage{CJK}
+%添加的
+ \usepackage{float}
+\graphicspath{{fig/}}
+
+\renewcommand{\P}{\ensuremath{\textup{\textbf{P}}}}
+
+\newcommand{\E}{\ensuremath{\textup{\textbf{E}}}}
+
+\theoremstyle{plain}
+\newtheorem{defn}{Definition}
+\newtheorem*{claim}{Claim}
+
+\newcommand{\csection}[1]
+    {\begin{center}
+        \stepcounter{section}
+        {\bf\large\arabic{section}. #1}
+    \end{center}
+    \vspace{-0.15 cm}
+}
+
+\newcommand{\scsection}[1]
+    {\begin{center}
+        {\bf\large #1}
+    \end{center}
+    \vspace{-0.15 cm}
+}
+
+\newcommand{\csubsection}[1]{
+\vspace{-0.25 cm}
+\begin{center}
+\stepcounter{subsection} {\it\arabic{section}.\arabic{subsection}
+#1}
+\end{center}
+\vspace{-0.25 cm} }
+
+\newcommand{\scsubsection}[1]{
+\vspace{-0.25 cm}
+\begin{center}
+\stepcounter{subsection} {\it #1}
+\end{center}
+\vspace{-0.25 cm} }
+
+\newcommand{\mc }{\mathcal }
+
+\def\ci{\perp\!\!\!\perp}
+\def\beq{\begin{equation}}
+\def\eeq{\end{equation}}
+\def\beqr{\begin{eqnarray}}
+\def\eeqr{\end{eqnarray}}
+\def\beqrs{\begin{eqnarray*}}
+\def\eeqrs{\end{eqnarray*}}
+\def\bet{\begin{theorem}}
+\def\eet{\end{theorem}}
+\def\bel{\begin{lemma}}
+\def\eel{\end{lemma}}
+\def\bep{\begin{proposition}}
+\def\eep{\end{proposition}}
+\def\bc{\begin{center}}
+\def\ec{\end{center}}
+%\def\mK{\mathcal K}
+%\def\mN{\mathcal N}
+%\def\mO{\mathcal O}
+%\def\mo{\mathbf o}
+%\def\mR{\mathbb{R}}
+%\def\mS{\mathcal S}
+%\def\mX{\mathbb{X}}
+%\def\mZ{\mathbb{Z}}
+\def\tr{\mbox{tr}}
+\def\var{\mbox{var}}
+\def\cov{\mbox{cov}}
+\def\CV{\mbox{CV}}
+\def\argmin{\mathrm{argmin}}
+\def\mUnif{\mathrm{Unif}}
+\def\mBernoulli{\mathrm{Bernoulli}}
+
+
+
+\def\tvb{\begin{picture}(8.5, 8)
+        \put(2,-2){\line(0,1){8.5}}
+        \put(4,-2){\line(0,1){8.5}}
+        \put(6,-2){\line(0,1){8.5}}
+        \end{picture}
+       }
+
+
+\def\ind{\begin{picture}(9,8)
+         \put(0,0){\line(1,0){9}}
+         \put(3,0){\line(0,1){8}}
+         \put(6,0){\line(0,1){8}}
+         \end{picture}
+        }
+\def\nind{\begin{picture}(9,8)
+         \put(0,0){\line(1,0){9}}
+         \put(3,0){\line(0,1){8}}
+         \put(6,0){\line(0,1){8}}
+         \put(1,0){{\it /}}
+         \end{picture}
+    }
+
+\begin{document}
+\begin{CJK}{GBK}{kai}
+
+%\begin{slide}
+
+\begin{center}
+{\Huge Research Notes [Threshold regression]}\\
+\medskip
+\medskip
+\medskip
+%{\Large Are you the Number One Professor of Statistics in the world?}
+\medskip
+\medskip
+\medskip
+
+
+zzz \\
+Renmin University of China, Beijing\\
+since August 7, 2014\\
+Current Version: \today
+\end{center}
+
+\begin{center}
+Contents
+\end{center}
+
+%\end{slide}
+\section{问题描述}
+
+对于回归树来说：给定训练集$D={(X_i,y_i)}$,一个回归树对应着输入空间的一个划分以及在划分空间上的输出值。假设输入空间可以划分为M个类，$R_1,R_2,\cdots, R_M$.并且在每个类上有一个固定的输出值$c_m$。则模型可以写成$y=\sum_{m=1}^Mc_mI(x\in R_m)$\\
+
+对于threshold regression来说，假设真实的模型是：
+$$y=\beta_0+\beta_1I(x_1>t_1)+\beta_2I(x_2>t_2)+\epsilon$$
+其可以写为$$y=\beta_0I(X_i\in R_1)+(\beta_0+\beta_1)I(X_i\in R_2)+(\beta_0+\beta_2)I(X_i\in R_3)+(\beta_0+\beta_1+\beta_2)I(X_i\in R_4)$$
+其中$R_i$是$x$之前不同的排列组合组成的4类。当然这里还对系数之间有一些潜在的约束。模型可以视为4个类的输出，$c_m$相当于每一类的均值。
+
+
+\section{模拟结果}
+\subsection{model1}
+$$y=1+2I(x_1>t_1)+3I(x_2>t_2)+c\epsilon$$ 其中$t_1=0.5,t_2=0.2$
+
+c=0.1时的决策树
+模拟的$n=1000$的数据的y的分布如下,相当于是从4类中生成出来的数据。
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=300pt]{plot(y)c=01.png}
+         \caption{y的散点图,c=0.1}
+\end{figure}
+
+决策树的效果如下;
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=400pt]{sig01.png}
+         \caption{噪声c=0.1}
+\end{figure}
+说明：
+\begin{itemize}
+  \item 其中每个节点方框中的数代表当前单元下的估计的y的均值，即$c_m$
+  \item 模型估计的叶子节点上的$c_m$精确的值是0.9998, 3.0003,3.9999 5.9996
+  \item 与真实值1,3,4,6.即$\beta_0,\beta_0+\beta_1,\beta_0+\beta_2,\beta_0+\beta_1+\beta_2$ 几乎一致，估计的很准确。
+  \item cut points的估计是$t_2=0.198，t_1=0.5,0.5$
+\end{itemize}
+
+当逐渐增大噪声c,令c=1时，虽然从散点图上已经看不出数据的类，但是决策树效果仍然非常稳定。[在c较大时，出来的决策树变量有时会重复出现。这时可以给生成过程加入一些限制。比如maxdepth=p]\\
+
+
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=300pt]{plot(y)c=1.png}
+         \caption{y的散点图,c=1}
+\end{figure}
+
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=400pt]{sig1.png}
+         \caption{噪声c=1}
+\end{figure}
+故意将噪声c加到5，决策树的结构如下
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=350pt]{sig5.png}
+         \caption{噪声c=5}
+\end{figure}
+估计的cut points是$t_2=0.2$,$t_1=0.51$和0.42. $c_m$ 是0.84，3.4，3.8，6. 与真实值1,3,4,6有一定误差，但是在噪音c=5的情况下，决策树仍然是很稳定的。\\
+以上估计结果整理如下：
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=450pt]{resulttable.png}
+         \caption{估计结果}
+\end{figure}
+\subsection{model2}
+假设有三个变量的：
+$$y=1+2I(x_1>t1)+3I(x_2>t2)+4I(x_3>t3)+c\epsilon$$ 其中$t_1=0.5,t_2=0.2,t_3=0$\\
+效果仍然很好，这里只列出$c=1$时候的一个例子
+\begin{figure}[H]
+        \centering
+         \includegraphics[width=400pt]{p3sig1.png}
+         \caption{p=3,噪声c=1}
+\end{figure}
+从图中看，估计的cut point是$t_3=-0.0013,t2=0.2,0.2$,估计的$t_3$是0.5,0.46,0.5,0.48.\\
+估计的模型系数是0.92,3,3.9,5.9,5.1,7,8.1,10和真实的相差不大
+\section{比较}
+用cart回归树模型和原来的threshold regression问题还是有一些差别的。
+\begin{itemize}
+  \item CART会涉及选变量，在高维的时候实际生成的树层次不是很深
+  \item CART算法不会保证在不同的分叉下，同一个$t_i$是相同的，所以若用估计出来的$c_i$去反解$\beta_j$时，会出现过度识别的情况。
+  \item CART算法是对二叉树的，不过也有别的理论方法去处理multi-way decision trees的情况
+\end{itemize}
+
+
+
+
+\end{CJK}
+\end{document}

@@ -1,0 +1,84 @@
+
+#Prediction Assignment Report
+
+## 1.load the data 
+we should firstly download the data and load the training and testing data into R workspace.
+```{r,eval=F}
+#load the data
+url1<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+url2<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+setwd("F:/05Course/Data science/8practical machine learning/p1")
+download.file(url1,"training.csv")
+download.file(url2,"testing.csv")
+```
+
+```{r}
+training<-read.csv("training.csv")
+testing<-read.csv("testing.csv")
+```
+
+## 2.basic description and data preprocess
+Before we construct any model, we will have a basic description of the data 
+```{r}
+dim(training)
+dim(testing)
+```
+As can be seen, there are `r dim(testing)[2]` variables. the final predicted varuable is "classe"(the manner in which they did the exercise). There are too many explanatory variables. if we use the `str(testing)`, howerver, we can find that many variables are just the missing values. so these variables can not be used in the prediction even though they may be very important. Besides, the first five columns are id and time, so they should also be excluded from the variabes.
+```{r}
+# deal with the missing variables and exclude the unnecessary variables
+tmp<-is.na(testing)
+index<-as.vector(which(colSums(tmp)==20))
+index<-cbind(t(as.vector(1:5)),t(index))
+length(index)
+```
+as can be seen, there are only `r 160-length(index)` variables(including "classe") that may be usefull.
+```{r}
+training<-training[,-index]
+testing<-testing[,-index]
+```
+
+## 3.construct the machine learing algorithm.
+
+In this part, we will use the decision tree method to construct the prediction model with the remaining variables.  
+Besides, we use the 10-fold cross validation to avoid the over fitting problem. The code is as follows:
+
+```{r}
+#model
+library(caret)
+library(rpart)
+modelfit1<-train(classe~.,method="rpart",data=training,
+trControl = trainControl(method = "cv",number = 10))
+modelfit1
+```
+As we can see the accuracy of the training data is only `r max(modelfit1$results$Accuracy)`. So we may think the expected out of sample error will be lower.
+
+## 4.prediction
+with the above model, we can use it to predict the users in the testing datasets.
+```{r}
+answers<-predict(modelfit1,newdata=testing)
+```
+then we can use the `submission.R code` to write out the txt files.
+```{r}
+source('submission.R')
+pml_write_files(answers)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
